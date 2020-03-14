@@ -1,5 +1,4 @@
-# switch-lan-play-gui
-A Switch lan play GUI for Windows
+# switch-lan-play-gui - A Switch lan play GUI for Windows
 
 How to execute?
 

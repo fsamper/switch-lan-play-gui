@@ -1,6 +1,8 @@
-# switch-lan-play-gui - A Switch lan play GUI for Windows
+# A Switch lan play GUI for Windows
 
-How to execute?
+Bassed on switch-lan-play.exe from spacemeowx2: https://github.com/spacemeowx2/switch-lan-play
+
+# How to execute?
 
 First clone the repository as usual:
 

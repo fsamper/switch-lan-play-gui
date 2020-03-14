@@ -16,7 +16,6 @@ class SwitchManger:
         """
         try:
             self.conn = sqlite3.connect(db_file)
-            print(sqlite3.version)
         except Error as e:
             print(e)
 

@@ -84,7 +84,11 @@ class App(Frame):
         return True
 
     def check_selected_server(self):
-        server_selected = self.list_box.get(self.list_box.curselection())
+        try:
+            server_selected = self.list_box.get(self.list_box.curselection())
+        except Exception:
+            server_selected = None
+
         if server_selected:
             return server_selected
 

@@ -1,0 +1,20 @@
+#notifications_section{
+    position:fixed;
+    z-index: 999;
+}
+
+#notifications_section{
+    padding-top: 1%;
+}
+
+#header_buttons{
+    padding-top: 1%;
+}
+
+#add_server_layout{
+    padding-top: 1%;
+}
+
+#server_list{
+    padding-top: 1%;
+}

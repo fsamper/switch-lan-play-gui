@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+{% load static %}
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Switch Lan Play - Servers</title>
+    <script src="https://code.jquery.com/jquery-3.4.1.min.js" integrity="sha256-CSXorXvZcTkaix6Yvo6HppcZGetbYMGWSFlBw8HfCJo=" crossorigin="anonymous"></script>
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js" integrity="sha384-wfSDF2E50Y2D1uUdj0O3uMBJnjuUD4Ih7YwaYd1iqfktj0Uod8GCExl3Og8ifwB6" crossorigin="anonymous"></script>
+    <script src="{% static 'js/serversGui.js' %}"></script>
+    <link href="{% static 'css/serversGui.css' %}" rel="stylesheet"></link>
+</head>
+<body>
+    <div id="container" class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
+        {% comment %} Notifications section {% endcomment %}
+        <div id="notifications_section" class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
+            <script>
+                notification_type = {{ notification_type }}
+            </script>
+            {% if notification_type == 1 and last_inserted %}
+                <div id="active_notification" class="alert alert-success" role="alert" style="display:none;">
+                    {{ last_inserted.name }} added correctly!!!
+                </div>
+            {% endif %}
+            {% if notification_type == 2 %}
+                <div id="active_notification" class="alert alert-danger" role="alert" style="display:none;">
+                    Server no responds!!!
+                </div>
+            {% endif %}
+        </div>
+
+        {% comment %} Header buttons {% endcomment %}
+        <div id="header_buttons" class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
+            <button id="add_server_button" type="button" class="btn btn-primary">Add Server</button>
+            <button id="refresh_server_button" type="button" class="btn btn-secondary">Refresh Server Status</button>
+        </div>
+
+        {% comment %} Add server layout {% endcomment %}
+        <div id="add_server_layout" class="col-xs-12 col-sm-12 col-md-6 col-lg-6" style="display:none;">
+            <form action="/save_server" method="post">
+              <div class="form-group">
+                <label for="server_address">Server Address</label>
+                <input name="server_address" type="text" class="form-control" id="server_address" aria-describedby="server_address_help" placeholder="Enter the address">
+                <small id="server_address_help" class="form-text text-muted">For example: switch.lan-play.com:11451</small>
+              </div>
+            <button id="save_server_button" type="submit" class="btn btn-success">Save Server</button>
+            </form>
+        </div>
+
+        {% comment %} Server list {% endcomment %}
+        <div id="server_list" class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
+            <div class="list-group">
+                {% if servers_list %}
+                    {% for server in servers_list %}
+                        <button type="button" class="list-group-item list-group-item-action">
+                            {{ server.url }}
+                        </button>
+                    {% endfor %}
+                {% else %}
+                    <button type="button" class="list-group-item list-group-item-action active">
+                        There aren't configured servers yet
+                    </button>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</body>
+</html>

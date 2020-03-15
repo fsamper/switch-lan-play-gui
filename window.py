@@ -1,4 +1,5 @@
 import os, urllib.request, json, re
+import threading
 from tkinter import *
 from tkinter import messagebox
 from labels import *
@@ -56,7 +57,7 @@ class App(Frame):
 
         # Refresh clients online button
         refresh_clients_button = Button(self.parent, text=refresh_clients_label, font=(24),
-                                        command=self.refresh_server_list)
+                                        command=self.refresh_server_list_thread)
         refresh_clients_button.pack(expand="yes", anchor="center")
 
     def launch_server(self):
@@ -99,12 +100,12 @@ class App(Frame):
                 pass
         if show_message:
             messagebox.showinfo(opps_label, server_no_reponse_label)
-        return ""
+        return "?"
 
     def check_selected_server(self):
         try:
             server_selected = self.list_box.get(self.list_box.curselection())
-            server_selected = server_selected.split("[")[0].strip()
+            server_selected = server_selected.split("]")[1].strip()
         except Exception:
             server_selected = None
 
@@ -159,9 +160,13 @@ class App(Frame):
                 messagebox.showinfo(great_label, server_address_example_label)
 
     def generate_list_register(self, address, clients_number):
-        aux = list_register_label % (address.ljust(50), clients_number)
+        aux = list_register_label % (str(clients_number), address)
 
         return aux
+
+    def refresh_server_list_thread(self):
+        thread1 = threading.Thread(target=self.refresh_server_list)
+        thread1.start()
 
     def refresh_server_list(self):
         self.list_box.delete(0, END)

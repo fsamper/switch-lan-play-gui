@@ -11,7 +11,7 @@ select_server_label = "Please, select a server first!!!"
 server_no_reponse_label = "Server no responds!!!"
 delete_server_label = "Delete server"
 server_deleted_label = "Server deleted!!!"
-list_register_label = "%s [clients_online: %s]"
+list_register_label = "[clients_online: %s]   %s"
 refresh_clients_label = "Refresh clients online"
 
 # Add server labels

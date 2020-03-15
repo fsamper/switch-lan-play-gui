@@ -1,4 +1,4 @@
-import os, socket
+import os, urllib.request, json, re
 from tkinter import *
 from tkinter import messagebox
 from labels import *
@@ -35,7 +35,7 @@ class App(Frame):
         self.load_server_list()
 
     def load_server_list(self):
-        self.list_box = Listbox(self.parent, width=40, height=4)
+        self.list_box = Listbox(self.parent, width=60, height=4)
         self.list_box.pack(side='left', fill='y')
 
         scrollbar = Scrollbar(self.parent, orient="vertical", command=self.list_box.yview)
@@ -43,12 +43,8 @@ class App(Frame):
 
         self.list_box.config(yscrollcommand=scrollbar.set)
 
-        manager = SwitchManger()
-        rows = manager.select_server('')
-        manager.close_connection()
-
-        for row in rows:
-            self.list_box.insert(END, str(row[1]))
+        # Load all server register
+        self.refresh_server_list()
 
         # Launch button
         launch_button = Button(self.parent, text=launch_client_label, font=(24), command=self.launch_server)
@@ -58,10 +54,15 @@ class App(Frame):
         delete_button = Button(self.parent, text=delete_server_label, font=(24), command=self.delete_server)
         delete_button.pack(expand="yes", anchor="center")
 
+        # Refresh clients online button
+        refresh_clients_button = Button(self.parent, text=refresh_clients_label, font=(24),
+                                        command=self.refresh_server_list)
+        refresh_clients_button.pack(expand="yes", anchor="center")
+
     def launch_server(self):
         if self.check_selected_server():
             server_selected = self.check_selected_server()
-            if self.check_ping(server_selected.split(":")[0]):
+            if self.check_server_status(server_selected, True):
                 command = "start /B start cmd.exe @cmd /k bin\lan-play.exe --relay-server-addr %s" % server_selected
                 os.system(command)
 
@@ -74,18 +75,36 @@ class App(Frame):
             self.list_box.delete(self.list_box.curselection())
             messagebox.showinfo(opps_label, server_deleted_label)
 
-    def check_ping(self, server_address):
+    def check_server_status(self, server_address, show_message):
+        """
+        Check the server status and returns players online
+        :param show_message:
+        :param server_address:
+        :return:
+        """
         try:
-            socket.gethostbyname(server_address)
-        except socket.gaierror as ex:
+            url = "http://%s/info" % server_address
+            response = urllib.request.urlopen(url).read()
+            data = json.loads(response)
+            if 'online' in data:
+                return data['online']
+        except Exception:
+            try:
+                url = "http://%s" % server_address
+                response = urllib.request.urlopen(url).read()
+                data = json.loads(response)
+                if 'clientCount' in data:
+                    return data['clientCount']
+            except Exception:
+                pass
+        if show_message:
             messagebox.showinfo(opps_label, server_no_reponse_label)
-            return False
-
-        return True
+        return ""
 
     def check_selected_server(self):
         try:
             server_selected = self.list_box.get(self.list_box.curselection())
+            server_selected = server_selected.split("[")[0].strip()
         except Exception:
             server_selected = None
 
@@ -115,19 +134,47 @@ class App(Frame):
             messagebox.showinfo(opps_label, sever_address_value_label, parent=self.add_server_win)
         else:
             server_address = self.server_address.get()
-            if self.check_ping(server_address.split(":")[0]):
-                # Object manager
-                manager = SwitchManger()
-                # Check if already exists
-                rows = manager.select_server(server_address)
-                if rows:
-                    messagebox.showinfo(great_label, server_already_exists_label)
-                else:
-                    manager.insert_server(server_address)
-                    self.list_box.insert(END, server_address)
-                    messagebox.showinfo(great_label, server_added_label)
-                    self.add_server_win.destroy()
-                manager.close_connection()
+            pattern = re.compile("^(?!http:|https:|www.)([-a-zA-Z0-9@:%._]{1,256}):([0-9]{1,5})$")
+
+            if pattern.match(server_address):
+                port_server = int(server_address.split(":")[1])
+
+                if port_server < 0 or port_server > 65535:
+                    messagebox.showinfo(great_label, server_port_values_label)
+                elif self.check_server_status(server_address, True):
+                    clients_online = self.check_server_status(server_address, False)
+                    # Object manager
+                    manager = SwitchManger()
+                    # Check if already exists
+                    rows = manager.select_server(server_address)
+                    if rows:
+                        messagebox.showinfo(great_label, server_already_exists_label)
+                    else:
+                        manager.insert_server(server_address)
+                        self.list_box.insert(END, self.generate_list_register(server_address, clients_online))
+                        messagebox.showinfo(great_label, server_added_label)
+                        self.add_server_win.destroy()
+                    manager.close_connection()
+            else:
+                messagebox.showinfo(great_label, server_address_example_label)
+
+    def generate_list_register(self, address, clients_number):
+        aux = list_register_label % (address.ljust(50), clients_number)
+
+        return aux
+
+    def refresh_server_list(self):
+        self.list_box.delete(0, END)
+
+        manager = SwitchManger()
+        rows = manager.select_server('')
+        manager.close_connection()
+
+        for row in rows:
+            server_address = str(row[1])
+            clients_online = self.check_server_status(server_address, False)
+            self.list_box.insert(END, self.generate_list_register(server_address, clients_online))
+
 
 def main():
     # Object manager
